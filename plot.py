@@ -75,6 +75,7 @@ class Figure:
                    N: int = 1000, line_style: Optional[str] = None, colour: Optional[str] = None,
                    label: Optional[str] = None, add_before_fixing_axes: bool = True) -> Figure:
         """
+        TODO: Не робит отображение Label в легенде
         todo: doc and ;сделать возможность проводить линию до края графика по оси xt влево или вправо, если указано None;
         :param func:
         :param x_min:
