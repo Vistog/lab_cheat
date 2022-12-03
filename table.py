@@ -19,7 +19,7 @@ def rus_tex_formula(formula: str) -> str:
 def to_table(Exel: str, transpose=False) -> List[List[float]]:
     table = tuple(map(lambda x: x.split('\t'), Exel.split('\n')))[:-1]
     if transpose: table = list(zip(*table))
-    return [[float(table[j][i]) for j in range(len(table)) if table[j][i] != ''] for i in range(len(table[0]))]
+    return [[float(table[j][i]) for j in range(len(table)) if table[j][i] != ' '] for i in range(len(table[0]))]
 
 
 class TexTable:
