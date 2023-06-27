@@ -114,8 +114,8 @@ class GroupFigure:
         cur_fig, axis = plt.subplots(form[0], form[1])
         for index in range(lenght):
             self.figures[index].print_on_fig(axis, index, form)
-        if lenght % form[1] == 1:
-            axis[-1, -1].axis("off")
+        for index in range(lenght, form[0]*form[1]):
+            axis[index // form[1], index % form[1]].axis("off")
         cur_fig.tight_layout()
         plt.show()
 
