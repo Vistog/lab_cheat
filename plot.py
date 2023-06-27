@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from functools import reduce
-from tkinter.messagebox import showwarning, askquestion, showerror
 from tkinter.filedialog import askdirectory
 from typing import Optional, Tuple, Union, Callable, SupportsFloat, Sequence
 
@@ -11,6 +10,10 @@ from numpy import array, linspace, sqrt
 from math import ceil
 
 from .var import Var, GroupVar, normalize
+
+from .messages import show_error, show_warning
+from colorama import Fore
+from colorama import Style
 
 
 class GroupFigure:
@@ -85,7 +88,7 @@ class GroupFigure:
     def show(self, save_graph: bool = False, path: str = '', form: tuple = None):
         lenght = len(self.figures)
         if lenght == 0:
-            showerror("Отрисовка графика", "В вашем GroupFigure нет ни одного графика! Рисовать нечего!")
+            show_error(f"Ни одного графика не построено, {Fore.YELLOW}нечего отрисовывать{Style.RESET_ALL}!")
             return
         if lenght == 1:
             self.figures[0].show(save_graph, path)
@@ -95,21 +98,23 @@ class GroupFigure:
         if form is None:
             form = (ceil(lenght/2), 2)
         else:
-            if lenght % 2 == 0 and form[1] * form[2] != lenght:
-                showerror("Отрисовка графика", "Вы передали методу show класса Group Figure в качестве параметра form "
-                          + str(form) + ". Так у вас получится " + str(form[0]*form[1]) + " ячеек, что не равно числу (" +
-                          str(lenght) + ") графика(ов).")
-                return
-            if lenght % 2 == 1 and form[1] * form[2] < lenght:
-                showerror("Отрисовка графика",
-                          "Вы передали методу show класса Group Figure в качестве параметра form " +
-                          str(form) + ". Так у вас получится " + str(form[0] * form[1]) + " ячеек, чего не хватит на ("
-                          + str(lenght) + ") графика(ов).")
-                return
+            # Если количество графиков меньше числа ячеек под них
+            if form[0]*(form[1] - 1) >= lenght:
+                show_warning(f"Странный параметр {Fore.YELLOW}form{Style.RESET_ALL} расстановки графиков, "
+                             f"передан {Fore.BLUE}" + str(form) + f"{Style.RESET_ALL}. "
+                             f"В таком размере будет много лишнего места (графиков меньше чем ячеек "
+                             f"и получается пустая строка). "
+                             f"Самый простой вариант: {Fore.GREEN}убрать параметр form{Style.RESET_ALL}.")
+            # Если количество графиков больше числа ячеек под них
+            if form[0] * form[1] < lenght:
+                show_error(f"Неверный параметр {Fore.YELLOW}form{Style.RESET_ALL} расстановки графиков, "
+                           f"передан {Fore.BLUE}" + str(form) + f"{Style.RESET_ALL}. "
+                           f"Этого количества ячеек не хватит на все графики. "
+                           f"Самый простой вариант: {Fore.GREEN}убрать параметр form{Style.RESET_ALL}.")
         cur_fig, axis = plt.subplots(form[0], form[1])
         for index in range(lenght):
-            self.figures[index].print_on_fig(axis, index)
-        if lenght % 2 == 1:
+            self.figures[index].print_on_fig(axis, index, form)
+        if lenght % form[1] == 1:
             axis[-1, -1].axis("off")
         cur_fig.tight_layout()
         plt.show()
@@ -334,8 +339,8 @@ class Figure:
 
         plt.show()
 
-    def print_on_fig(self, axis, index):
-        axes = axis[index // 2, index % 2]
+    def print_on_fig(self, axis, index, form):
+        axes = axis[index // form[1], index % form[1]]
         self._grid_lines(axes)
         self._show_plots(axes)
         self._show_func_graphs_before_fixing_axes(axes)
