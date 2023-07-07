@@ -10,6 +10,7 @@ from numpy import array, linspace, sqrt
 from math import ceil
 
 from .var import Var, GroupVar, normalize
+from .settings import always_override_graphs
 
 from .messages import show_error, show_warning
 from colorama import Fore
@@ -371,7 +372,7 @@ class Figure:
         if path == '':
             path = askdirectory()
             if path == '':
-                showwarning("Сохранение файла", "Директория не выбрана, график не сохранён!")
+                show_warning(f"Директория не выбрана, {Fore.YELLOW}график не сохранён{Style.RESET_ALL}!")
                 return
         over_write = True
         file_exists = True
@@ -380,8 +381,9 @@ class Figure:
         except IOError:
             file_exists = False
         if file_exists:
-            if askquestion("Сохранение файла", "Вы уверены, что хотите перезаписать графики?") == "no":
-                over_write = False
+            if always_override_graphs == False:
+                if askquestion("Сохранение файла", "Вы уверены, что хотите перезаписать графики?") == "no":
+                    over_write = False
         if over_write:
             mat_fig.savefig(path + "/" + self.graph_name)
 
